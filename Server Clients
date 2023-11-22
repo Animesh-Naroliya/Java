@@ -1,0 +1,120 @@
+// SERVER
+
+import java.io.*;
+import java.net.*;
+import java.util.*;
+import java.net.ServerSocket;
+
+public class Serrver {
+    public static void main(String[] args) {
+        
+        Socket socket = null;
+        InputStreamReader inputStreamReader = null;
+        OutputStreamWriter outputStreamWriter = null;
+        BufferedReader bufferedReader = null;
+        BufferedWriter bufferedWriter = null;
+        ServerSocket serverSocket = null;
+
+        serverSocket = new ServerSocket(1234);
+
+        while(true) {
+            
+            try {
+
+                socket = serverSocket.accept(); // THE PROGRAM WON'T ADVANCE IF IT IS NOT CONNECTED TO A CLIENT
+
+                inputStreamReader = new InputStreamReader(socket.getInputStream());
+                outputStreamWriter = new OutputStreamWriter(socket.getOutputStream());
+
+                bufferedReader = new BufferedReader(inputStreamReader);
+                bufferedWriter = new BufferedWriter(outputStreamWriter);
+
+                while(true) {
+
+                    String messageFromClient = bufferedReader.readLine();
+                    System.out.println("Client: " + messageFromClient);
+
+                    bufferedWriter.write("Message received"); // WRITES EACH TIME WHEN ANY MESSAGE IS RECEIVED
+                    bufferedWriter.newLine();
+                    bufferedWriter.flush();
+
+                    if(messageFromClient.equalsIgnoreCase("BYEE"))
+                        break;
+                }
+                serverSocket.close();
+                socket.close();
+                inputStreamReader.close();
+                outputStreamWriter.close();
+                bufferedReader.close();
+                bufferedWriter.close();
+            } catch(IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+}
+
+
+// Client
+
+import java.io.*;
+import java.net.*;
+import java.util.*;
+
+public class Clieent {
+    public static void main(String[] args) {
+
+        // WE HAVE DONE CREATING ALL THE OBJECTS.
+
+        Socket socket = new Socket();
+        InputStreamReader inputStreamReader = null;
+        OutputStreamWriter outputStreamWriter = null;
+        BufferedReader bufferedReader = null;
+        BufferedWriter bufferedWriter = null;
+
+        // WILL TRY THESE THINGS OUT NOW.
+
+        try {
+            socket = new Socket("LoaclHost", 1234); //FOR CONNECTING TO SERVER 
+            
+            inputStreamReader = new InputStreamReader(socket.getInputStream()); // inputStreamReader() runs on byte stream.
+            outputStreamWriter = new OutputStreamWriter(socket.getOutputStream());
+
+            bufferedReader = new BufferedReader(inputStreamReader);
+            bufferedWriter = new BufferedWriter(outputStreamWriter);
+
+            Scanner scanner = new Scanner(System.in);
+
+            while(true) {
+
+                String messageToSend = scanner.nextLine();
+                bufferedWriter.write(messageToSend); // IT'LL SEND MESSAGE BUT NOT THE NEW LINE CHARACTER 
+                bufferedWriter.newLine(); // FOR A NEW LINE WE HAVE TO ADD THIS. THIS IS EXPLICITLY CALLING NEW LINE AS THE PROGRAM MIGHT NOT KNOW WHEN THE LINE IS ENDED.
+                bufferedWriter.flush(); // WE HAVE TO FLUSH THE BUFFER AS IT STORES DATA IN THE FORM OF BIG TEXT FILES EVEN THOUGH WE DON'T NEED THIS BUT FOR BIG PROJECTS THIS WILL BE OF USE. HERE OUR GOAL IS ONLY THE EFFICIENCY
+                
+                System.out.println("Server: "+ bufferedReader.readLine()); //
+
+                if(messageToSend.equalsIgnoreCase("BYEE")) 
+                    break;
+            }
+        } catch(IOException e) {
+            e.printStackTrace();
+        } finally { // MAKING CODE MORE EFFICIENT AND TRYING TO BE MORE SPECIFIC IN CLOSING AND DEALLOCATING MEMORY FOR ALL THE OBJECTS TO FREE THE USED MEMORY 
+            try {
+                if(socket != null)
+                    socket.close();
+                if(inputStreamReader != null)
+                    inputStreamReader.close();
+                if(outputStreamWriter != null)
+                    outputStreamWriter.close();
+                if(bufferedReader != null)
+                    bufferedReader.close();
+                if(bufferedWriter != null)
+                    bufferedWriter.close();
+            } catch(IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
+}
